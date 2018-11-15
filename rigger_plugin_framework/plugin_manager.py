@@ -120,7 +120,7 @@ class PluginManager:
         :return:
         """
         plugin_types = self.__plugin_type_map.get(plugin_type)
-        if plugin_type is None:
+        if plugin_types is None:
             self.__plugin_type_map[plugin_type] = []
             return self.__plugin_type_map.get(plugin_type)
         else:
