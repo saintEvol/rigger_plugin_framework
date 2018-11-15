@@ -80,7 +80,7 @@ class PluginManager:
         """
         insts = self.__plugin_instances
         if len(insts) <= 0:
-            for plugin_cls in self.all_plugins:
+            for plugin_cls in self.raw_plugins():
                 inst = plugin_cls()
                 insts.append(inst)
                 self.add_plugin_type(inst)
