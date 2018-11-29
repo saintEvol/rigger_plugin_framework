@@ -1,3 +1,5 @@
+# -*- coding:utf-8
+
 from rigger_singleton.singleton import singleton
 from rigger_plugin_framework.plugin_collector import PluginCollector
 from rigger_plugin_framework.plugin import Plugin
@@ -36,9 +38,24 @@ class PluginManager:
         return manager.all_plugins
 
     @staticmethod
+    def get_plugin_names_by_type(t):
+        plugins = PluginManager().get_plugins_by_type(t)
+        ret = []
+        for plugin in plugins:
+            name = plugin.get_plugin_name()
+            ret.append(name)
+
+        return ret
+
+    @staticmethod
     def start_plugins():
         manager = PluginManager()
         manager.launch_plugins()
+
+    @staticmethod
+    def pick_plugins(plugin_type, plugin_name=None):
+        manager = PluginManager()
+        return manager.get_plugins_by_type(plugin_type, plugin_name)
 
     @staticmethod
     def install(file_path, dest_dir):
@@ -59,10 +76,21 @@ class PluginManager:
         """
         PluginCollector.collect(path)
 
+    @staticmethod
+    def remove_plugins():
+        """
+
+        :return:
+        """
+        manager = PluginManager()
+        manager.__plugin_instances = []
+        manager.__plugin_type_map = dict()
+        manager.__raw_plugins = []
+
     def __init__(self):
         self.__raw_plugins = []
         self.__plugin_instances = []
-        self.__plugin_type_map = {}
+        self.__plugin_type_map = dict()
 
     def register_plugin(self, cls):
         """
@@ -83,6 +111,7 @@ class PluginManager:
             for plugin_cls in self.raw_plugins():
                 inst = plugin_cls()
                 insts.append(inst)
+                inst.on_start()
                 self.add_plugin_type(inst)
 
     def stop_plugins(self):
@@ -108,15 +137,16 @@ class PluginManager:
         :param plugin:
         :return:
         """
-        plugins = self.get_plugins_by_type(plugin.plugin_type)
+        plugins = self.get_plugins_by_type(plugin.get_plugin_type())
         assert isinstance(plugins, list)
         if plugin not in plugins:
             plugins.append(plugin)
 
-    def get_plugins_by_type(self, plugin_type):
+    def get_plugins_by_type(self, plugin_type, plugin_name=None):
         """
         获取指定类型的插件实例列表
         :param plugin_type:
+        :param plugin_name:
         :return:
         """
         plugin_types = self.__plugin_type_map.get(plugin_type)
@@ -124,7 +154,14 @@ class PluginManager:
             self.__plugin_type_map[plugin_type] = []
             return self.__plugin_type_map.get(plugin_type)
         else:
-            return plugin_types
+            if plugin_name is not None:
+                temp = []
+                for plugin in plugin_types:
+                    if plugin.get_plugin_name() == plugin_name:
+                        temp.append(plugin)
+                return temp
+            else:
+                return plugin_types
 
     @property
     def all_raw_plugins(self):

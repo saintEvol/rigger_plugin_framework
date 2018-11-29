@@ -1,13 +1,15 @@
-from rigger_singleton.singleton import singleton
+# -*- coding:utf-8
 
-
-@singleton
 class Plugin:
     __slots__ = ()
 
-    @property
-    def plugin_type(self):
+    @staticmethod
+    def get_plugin_type():
         return 0
+
+    @staticmethod
+    def get_plugin_name():
+        return ""
 
     @staticmethod
     def doc():
